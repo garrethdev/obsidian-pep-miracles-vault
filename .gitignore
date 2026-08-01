@@ -1,0 +1,14 @@
+# Machine-local, recreated by scripts/setup.sh
+04-AI-Memory
+
+# macOS
+.DS_Store
+._*
+
+# Obsidian per-machine state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+
+# Obsidian trash
+.trash/

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Blocks a commit that looks like it carries a credential.
+set -uo pipefail
+
+PATTERN='sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{32,}|fc-[A-Za-z0-9]{20,}|eyJ[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{10,}|AIza[0-9A-Za-z_-]{30,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|SERVICE_ROLE_KEY\s*[:=]|SUPABASE_[A-Z_]*SECRET'
+
+FOUND=0
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  if git show ":$f" 2>/dev/null | grep -nEI "$PATTERN" >/dev/null 2>&1; then
+    echo "blocked: $f looks like it contains a credential"
+    FOUND=1
+  fi
+done < <(git diff --cached --name-only --diff-filter=ACM)
+
+if [ "$FOUND" -eq 1 ]; then
+  echo
+  echo "This vault is for notes only. Keys live in ~/.config/peptide-secrets/.env"
+  echo "If this is a false positive: git commit --no-verify"
+  exit 1
+fi
+exit 0
